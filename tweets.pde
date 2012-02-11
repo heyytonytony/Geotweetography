@@ -38,8 +38,8 @@ PShape mainMap;
 State hoverState = null;
 
 //offsets for drawing the map
-int offsetX = 95;
-int offsetY = 30;
+int offsetX = 395;
+int offsetY = 230;
 
 //scale factor for the map
 float mapScale = 0.7;
@@ -60,32 +60,28 @@ int colorBarWidth = 250;
 int colorBarHeight = 25;
 
 //color values
-//red
+//full
 float maxColorR = 255f;
 float maxColorG = 255f;
 float maxColorB = 255f;
 
-//yellow
+//mid
 float midColorR = 127.5f;
 float midColorG = 127.5f;
 float midColorB = 255f;
 
-//green     
+//empty     
 float minColorR = 0f;
 float minColorG = 0f;
 float minColorB = 255f;
 
-//the slider object to be used with color bar
-HorizontalSlider slider;
-
-//percetage of data range that maps to yellow (the color midpoint).
 float midPoint = 0.5;
 
 void setup()
 {
      mainMap = loadShape("Blank_US_Map.svg");
-     size(800,550);
-     bgImage = loadImage("background2.png");
+     size(1200,800);
+     bgImage = loadImage("background3.png");
      states = new HashMap(STATE_NAMES.length);
      for(int i=0;i<STATE_NAMES.length;i+=2)
      {
@@ -95,9 +91,7 @@ void setup()
      _calcColorStates();
      _createColorBar();
      _calcColorBar();
-     _createSlider();
      
-     slider.setValue(midPoint); 
      connectTwitter();
      twitter.addListener(listener);
      if (keywords.length==0) twitter.sample();
@@ -137,8 +131,8 @@ void draw()
      popMatrix();
 
      //draw color bar  border
-     int cx = width - 300;
-     int cy = height - 55;
+     int cx = width - 590;
+     int cy = height - 210;
      noFill();
      stroke(100,100,0);
      quad(cx-1, cy-1,
@@ -153,10 +147,6 @@ void draw()
      fill(0,0,0,210);
      String maxValueString = String.format("%,d", maxValue);
      text(maxValueString,cx + colorBarWidth - textWidth(maxValueString),cy + colorBarHeight +15);
-     
-     slider.setPosY(cy-20);
-     slider.setRange(cx,cx+colorBarWidth);
-     slider.draw();
      
      //draw the bgImage here so it is mulitplied with already-drawn graphics
      blend(bgImage,0,0,width,height,0,0,width,height,MULTIPLY);
@@ -182,7 +172,6 @@ void draw()
 
 void mousePressed()
 {
-     slider.press(mouseX, mouseY);
 }
 
 void mouseMoved()
@@ -216,30 +205,15 @@ void mouseMoved()
 
 void mouseDragged()
 {
-     if(slider.isPressed())
-     {
-          slider.setValue(mouseX);
-          midPoint = slider.getValue();
-          //println("midPoint = "+midPoint);
-          _calcColorStates();
-          _calcColorBar();
-     }
 }
 
 void mouseReleased()
 {
-     slider.release();
 }
 
 void _createColorBar()
 { 
      colorBar = createImage(colorBarWidth,colorBarHeight,ARGB);
-}
-
-void _createSlider()
-{
-     slider = new HorizontalSlider();
-
 }
 
 color _getColor(float f, float m)
@@ -424,115 +398,6 @@ class State
           (float)(r.getX()+r.getWidth()),(float)r.getY(),
           (float)(r.getX()+r.getWidth()),(float)(r.getY()+r.getHeight()),
           (float) r.getX(),(float)(r.getY()+r.getHeight()));
-     }
-}
-
-/**
- *  Horizontal Slider class used on top of the color bar.
- */
-class HorizontalSlider
-{
-     boolean pressed;
-     
-     float start;
-     float end;
-     float range;
-     
-     float value;
-     
-     float w;
-     float h;
-     
-     float x;
-     float y;
-     
-     public HorizontalSlider()
-     {
-          pressed = false;
-          w = 32;
-          h = 15;
-     }
-     
-     public void draw()
-     {
-          int sx = round(this.x - this.w/2.0); 
-          stroke(50,50,0);
-          fill(255,255,50);
-          quad(sx,y,sx+w,y,sx+w,y+h,sx,y+h); 
-          fill(50,50,0);
-          text(String.format("%1.2f",value), sx + 4,y + h - 3);     
-     }
-     
-     float getValue()
-     {
-          return value;
-     }
-     
-     public boolean isPressed()
-     {
-          return pressed;
-     }
-     
-     public void press(int xp, int yp)
-     {
-          int sx = round(this.x - this.w/2.0); 
-          if(xp > sx && xp < (sx + this.w))
-          {
-               if(yp > this.y && yp < (this.y + this.h))
-               {
-                    pressed = true;
-               }
-          }
-     }
-     
-     public void release()
-     {
-          pressed = false;
-     }
-     
-     void setPosY(int y)
-     {
-          this. y = y;
-     }
-     
-     //set the value in terms of pixel position 
-     void setValue(int i)
-     {
-          if(i < start)
-          {
-               i = int(start);
-          }
-          else if(i > end)
-          {
-               i = int(end);
-          }
-          this.x  = i;
-          this.value = (this.x - this.start)/this.range;
-     }
-     
-     //set the value in terms of a percentage (0.0 -> 1.0)
-     void setValue(float f)
-     {
-          if(f < 0.0)
-          { 
-               f= 0.0;
-          }
-          else if(f > 1.0)
-          {
-               f = 1.0;
-          }
-          this.value = f;
-          this.x = round(start + value*range);
-     }
-     
-     //set the pixel range of the slider
-     void setRange(int start, int end)
-     {
-          this.start = start;
-          this.end = end;
-          this.range = end - start;
-          //update "value" and "x" values
-          this.setValue(value);
      }
 }
 
