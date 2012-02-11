@@ -61,19 +61,19 @@ int colorBarHeight = 25;
 
 //color values
 //red
-float maxColorR = 255.0;
-float maxColorG = 0.0;
-float maxColorB = 0.0;
+float maxColorR = 255f;
+float maxColorG = 255f;
+float maxColorB = 255f;
 
 //yellow
-float midColorR = 255.0;
-float midColorG = 255.0;
-float midColorB = 0.0;
+float midColorR = 127.5f;
+float midColorG = 127.5f;
+float midColorB = 255f;
 
 //green     
-float minColorR = 0.0;
-float minColorG = 255.0;
-float minColorB = 0.0;
+float minColorR = 0f;
+float minColorG = 0f;
+float minColorB = 255f;
 
 //the slider object to be used with color bar
 HorizontalSlider slider;
