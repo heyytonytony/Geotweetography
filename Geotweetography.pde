@@ -185,11 +185,11 @@ void draw()
         float twh = 100;
         float twr = 50;
 
-        beginShape();
         smooth();
         fill(135,206,250);
         strokeWeight(2);
         stroke(99,99,99);
+        beginShape();
         vertex(twx, twy + twr); //top of left side
         bezierVertex(twx, twy, twx, twy, twx + twr, twy); //top left corner
         vertex(twx + tww - twr, twy); //right of top side
@@ -202,7 +202,18 @@ void draw()
 
         twPic.resize(84,0);
         image(twPic, twx+12, twy+8);
-        //TODO: round image border
+        noFill();
+        stroke(211,211,211);
+        beginShape();
+        vertex(twx, twy + twr); //top of left side
+        bezierVertex(twx, twy, twx, twy, twx + twr, twy); //top left corner
+        vertex(twx + tww - twr, twy); //right of top side
+        bezierVertex(twx + tww, twy, twx + tww, twy, twx + tww, twy + twr); //top right corner
+        vertex(twx + tww, twy + twh - twr); //bottom of right side
+        bezierVertex(twx + tww, twy + twh, twx + tww, twy + twh, twx + tww - twr, twy + twh); //bottom right corner
+        vertex(twx + twr, twy + twh); //left of bottom side
+        bezierVertex(twx, twy + twh, twx, twy + twh, twx, twy + twh - twr); //bottom left corner
+        endShape(CLOSE);
         fill(0,0,0);
         text(twTweet, twx+100, twy+10, 190, 80);
 
