@@ -79,11 +79,18 @@ float minColorB = 255f;
 
 float midPoint = 0.5;
 
+//play button
+boolean playb = false;
+boolean init = false;
+PImage play, pause;
+
 void setup()
 {
     mainMap = loadShape("Blank_US_Map.svg");
     size(1200,800);
     bgImage = loadImage("background3.png");
+    play = loadImage("play.png");
+    pause = loadImage("pause.png");
     states = new HashMap(STATE_NAMES.length);
     for(int i=0;i<STATE_NAMES.length;i+=2)
     {
@@ -93,10 +100,6 @@ void setup()
     _calcColorStates();
     _createColorBar();
     _calcColorBar();
-
-    connectTwitter();
-    twitter.addListener(listener);
-    twitter.sample();
 }
 
 boolean first = true;
@@ -227,33 +230,48 @@ void draw()
         text(twTweet, twx+100, twy+10, 190, 80);
 
     }
+    
+    //play button
+    if(playb) image(play,30,730);
+    else image(pause,30,730);
 }
 
 
 void mousePressed()
 {
-    //trasform mouse coords to account for the transformation applied to the map
-    int mX = round(float(mouseX)/mapScale) - offsetX;
-    int mY = round(float(mouseY)/mapScale) - offsetY;
-    for(int i=0;i<STATE_NAMES.length;i+=2)
-    {
-        State s = (State)states.get(STATE_NAMES[i]);
-        if(s.getName().equals("Alaska") || s.getName().equals("Hawaii"))
-        {
-            if(s.isNear(mX, mY) && s.sizeTw() > 0)
-            {
-                curTweeter = s.removeTw();
-                break;
-            }
+    if(mouseX > 25 && mouseX < 100 && mouseY > 725 && mouseY < 790){
+        playb = !playb;
+        if(play && !init){
+          connectTwitter();
+          twitter.addListener(listener);
+          twitter.sample(); 
+          init = true;
         }
-        else
-        {
-            if(s.hover(mX,mY) && s.sizeTw() > 0)
-            {
-                curTweeter = s.removeTw();
-                break;
-            }
-        }
+    }
+    else{  
+      //trasform mouse coords to account for the transformation applied to the map
+      int mX = round(float(mouseX)/mapScale) - offsetX;
+      int mY = round(float(mouseY)/mapScale) - offsetY;
+      for(int i=0;i<STATE_NAMES.length;i+=2)
+      {
+          State s = (State)states.get(STATE_NAMES[i]);
+          if(s.getName().equals("Alaska") || s.getName().equals("Hawaii"))
+          {
+              if(s.isNear(mX, mY) && s.sizeTw() > 0)
+              {
+                  curTweeter = s.removeTw();
+                  break;
+              }
+          }
+          else
+          {
+              if(s.hover(mX,mY) && s.sizeTw() > 0)
+              {
+                  curTweeter = s.removeTw();
+                  break;
+              }
+          }
+      }
     }
 }
 
@@ -544,7 +562,7 @@ StatusListener listener = new StatusListener()
 {
     public void onStatus(Status status)
     {
-
+      if(play){
         //println(status.getUser().getName() + " says:  " + status.getText());      //debuggery
         //println("country :  " + status.getUser().getLocation());                  //debuggery
 
@@ -564,6 +582,7 @@ StatusListener listener = new StatusListener()
             }
 
         }
+      }
     }
 
     public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice)
