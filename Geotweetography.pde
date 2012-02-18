@@ -33,11 +33,15 @@ HashMap states;
 
 PShape mainMap;
 
-//the current hover-over state
+//the current hover-over state and latest tweeter
 State hoverState = null;
+Tweeter hoverTweet = null;
 
 //current displayed tweet
 Tweeter curTweeter = null;
+
+//current tweets in sidebar
+Queue<Tweeter> sideTweets = new LinkedList<Tweeter>();
 
 //offsets for drawing the map
 int offsetX = 395;
@@ -55,6 +59,9 @@ int standardAlpha = 180;
 
 //background image
 PImage bgImage;
+
+//mouseover image
+PImage moImage;
 
 //dynamic image of color bar
 PImage colorBar;
@@ -84,6 +91,8 @@ void setup()
     mainMap = loadShape("Blank_US_Map.svg");
     size(1200,800);
     bgImage = loadImage("background3.png");
+    moImage = loadImage("mouseoverx.png");
+    moImage.resize(330,0);
     states = new HashMap(STATE_NAMES.length);
     for(int i=0;i<STATE_NAMES.length;i+=2)
     {
@@ -158,75 +167,84 @@ void draw()
     //draw hover graphics here so they are not part of the multiply blending
     if(hoverState != null)
     {
-        String hoverString = hoverState.getName()+" "+String.format("%,d", hoverState.getValue());
+        String hoverString = hoverState.getName()+":  "+String.format("%,d", hoverState.getValue())+" tweets";
         float x = mouseX + 15;
         float y = mouseY;
         float w = textWidth(hoverString)+5;
         float h = 16;
 
-        fill(255,255,200);
-        stroke(100,100,0);
-        quad(x,y,x+w,y,x+w,y+h,x,y+h);
+        image(moImage, x, y);
+        fill(230,230,230);
+        textSize(18);
+        text(hoverString, x+60, y+30);
+        text("Latest: ", x+40, y+55);
+        textSize(13);
+        textLeading(14);
+        if(hoverTweet != null)
+        {
+            text(hoverTweet.getTweet(), x+105, y+40, 210, 70);
+        }
+        else
+        {
+            text("none", x+105, y+55);
+        }
 
-        fill(50,50,0);
-        text(hoverString, x+5,y+13);
     }
 
     //drawing displayed tweet stuff
-    if(curTweeter != null)
-    {
-        PImage twPic = loadImage(curTweeter.getImgURL().toString());
-        String twTweet = curTweeter.getTweet();
-
-        //tweet display box
-        float twx = width/2 - 150;
-        float twy = height*0.84375;
-        float tww = 300;
-        float twh = 100;
-        float twr = 50;
-
-        smooth();
-        fill(135,206,250);
-        strokeWeight(2);
-        stroke(99,99,99);
-        beginShape();
-        vertex(twx, twy + twr); //top of left side
-        bezierVertex(twx, twy, twx, twy, twx + twr, twy); //top left corner
-        vertex(twx + tww - twr, twy); //right of top side
-        bezierVertex(twx + tww, twy, twx + tww, twy, twx + tww, twy + twr); //top right corner
-        vertex(twx + tww, twy + twh - twr); //bottom of right side
-        bezierVertex(twx + tww, twy + twh, twx + tww, twy + twh, twx + tww - twr, twy + twh); //bottom right corner
-        vertex(twx + twr, twy + twh); //left of bottom side
-        bezierVertex(twx, twy + twh, twx, twy + twh, twx, twy + twh - twr); //bottom left corner
-        endShape(CLOSE);
-
-        twPic.resize(84,0);
-        image(twPic, twx+12, twy+8);
-
-        //image border
-        noFill();
-        stroke(211,211,211);
-        twx += 12;
-        twy += 8;
-        tww = 84;
-        twh = tww;
-        twr = 10;
-        beginShape();
-        vertex(twx, twy + twr); //top of left side
-        bezierVertex(twx, twy, twx, twy, twx + twr, twy); //top left corner
-        vertex(twx + tww - twr, twy); //right of top side
-        bezierVertex(twx + tww, twy, twx + tww, twy, twx + tww, twy + twr); //top right corner
-        vertex(twx + tww, twy + twh - twr); //bottom of right side
-        bezierVertex(twx + tww, twy + twh, twx + tww, twy + twh, twx + tww - twr, twy + twh); //bottom right corner
-        vertex(twx + twr, twy + twh); //left of bottom side
-        bezierVertex(twx, twy + twh, twx, twy + twh, twx, twy + twh - twr); //bottom left corner
-        endShape(CLOSE);
-
-        //display tweet text
-        fill(0,0,0);
-        text(twTweet, twx+100, twy+10, 190, 80);
-
-    }
+    //~ if(curTweeter != null)
+    //~ {
+        //~ PImage twPic = loadImage(curTweeter.getImgURL().toString());
+        //~ String twTweet = curTweeter.getTweet();
+//~
+        //~ //tweet display box
+        //~ float twx = width/2 - 150;
+        //~ float twy = height*0.84375;
+        //~ float tww = 300;
+        //~ float twh = 100;
+        //~ float twr = 50;
+//~
+        //~ smooth();
+        //~ fill(135,206,250);
+        //~ strokeWeight(2);
+        //~ stroke(99,99,99);
+        //~ beginShape();
+        //~ vertex(twx, twy + twr); //top of left side
+        //~ bezierVertex(twx, twy, twx, twy, twx + twr, twy); //top left corner
+        //~ vertex(twx + tww - twr, twy); //right of top side
+        //~ bezierVertex(twx + tww, twy, twx + tww, twy, twx + tww, twy + twr); //top right corner
+        //~ vertex(twx + tww, twy + twh - twr); //bottom of right side
+        //~ bezierVertex(twx + tww, twy + twh, twx + tww, twy + twh, twx + tww - twr, twy + twh); //bottom right corner
+        //~ vertex(twx + twr, twy + twh); //left of bottom side
+        //~ bezierVertex(twx, twy + twh, twx, twy + twh, twx, twy + twh - twr); //bottom left corner
+        //~ endShape(CLOSE);
+//~
+        //~ twPic.resize(84,0);
+        //~ image(twPic, twx+12, twy+8);
+//~
+        //~ //image border
+        //~ noFill();
+        //~ stroke(211,211,211);
+        //~ twx += 12;
+        //~ twy += 8;
+        //~ tww = 84;
+        //~ twh = tww;
+        //~ twr = 10;
+        //~ beginShape();
+        //~ vertex(twx, twy + twr); //top of left side
+        //~ bezierVertex(twx, twy, twx, twy, twx + twr, twy); //top left corner
+        //~ vertex(twx + tww - twr, twy); //right of top side
+        //~ bezierVertex(twx + tww, twy, twx + tww, twy, twx + tww, twy + twr); //top right corner
+        //~ vertex(twx + tww, twy + twh - twr); //bottom of right side
+        //~ bezierVertex(twx + tww, twy + twh, twx + tww, twy + twh, twx + tww - twr, twy + twh); //bottom right corner
+        //~ vertex(twx + twr, twy + twh); //left of bottom side
+        //~ bezierVertex(twx, twy + twh, twx, twy + twh, twx, twy + twh - twr); //bottom left corner
+        //~ endShape(CLOSE);
+//~
+        //~ //display tweet text
+        //~ fill(0,0,0);
+        //~ text(twTweet, twx+100, twy+10, 190, 80);
+    //~ }
 }
 
 
@@ -272,6 +290,7 @@ void mouseMoved()
             if(s.isNear(mX, mY))
             {
                 hoverState = s;
+                hoverTweet = s.peekLatestTw();
                 break;
             }
         }
@@ -280,6 +299,7 @@ void mouseMoved()
             if(s.hover(mX,mY))
             {
                 hoverState = s;
+                hoverTweet = s.peekLatestTw();
                 break;
             }
         }
@@ -369,7 +389,7 @@ void _calcColorStates()
  {
     Rectangle bounds;
     String name;
-    Queue<Tweeter> tweets = new LinkedList<Tweeter>();
+    Deque<Tweeter> tweets = new LinkedList<Tweeter>();
     PShape pShape;
     int value;
     color c;
@@ -485,6 +505,11 @@ void _calcColorStates()
     public boolean addTw(Tweeter twt)
     {
         return tweets.add(twt);
+    }
+
+    public Tweeter peekLatestTw()
+    {
+        return tweets.peekLast();
     }
 
     public Tweeter removeTw()
