@@ -202,8 +202,15 @@ void draw()
 
         twPic.resize(84,0);
         image(twPic, twx+12, twy+8);
+
+        //image border
         noFill();
         stroke(211,211,211);
+        twx += 12;
+        twy += 8;
+        tww = 84;
+        twh = tww;
+        twr = 10;
         beginShape();
         vertex(twx, twy + twr); //top of left side
         bezierVertex(twx, twy, twx, twy, twx + twr, twy); //top left corner
@@ -214,6 +221,8 @@ void draw()
         vertex(twx + twr, twy + twh); //left of bottom side
         bezierVertex(twx, twy + twh, twx, twy + twh, twx, twy + twh - twr); //bottom left corner
         endShape(CLOSE);
+
+        //display tweet text
         fill(0,0,0);
         text(twTweet, twx+100, twy+10, 190, 80);
 
