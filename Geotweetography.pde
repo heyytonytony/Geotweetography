@@ -1,7 +1,6 @@
 
 import java.util.HashMap;
 import java.awt.Rectangle;
-import java.awt.Polygon;
 import java.lang.Math;
 import java.util.Enumeration;
 
@@ -36,6 +35,9 @@ PShape mainMap;
 
 //the current hover-over state
 State hoverState = null;
+
+//current displayed tweet
+Tweeter curTweeter = null;
 
 //offsets for drawing the map
 int offsetX = 395;
@@ -102,10 +104,12 @@ void draw()
 {
     _calcColorStates();
     _calcColorBar();
+
     //sleep on the first frame so you don't get that awkward, partially drawn frame
     if(first)
     {
-        try{
+        try
+        {
             Thread.sleep(500);
         }
         catch(Exception e){}
@@ -115,21 +119,22 @@ void draw()
     //clear the screen
     background(255);
 
-    //push matrix to apply scale effect
+    //push current coordinate system to apply scale effect
     pushMatrix();
 
     scale(mapScale);
 
+    //draw states' colours
     Iterator iter = states.values().iterator();
     while(iter.hasNext())
     {
         ((State)iter.next()).draw();
     }
 
-    //popMatrix to remove the scale effect
+    //pop old coordinate system
     popMatrix();
 
-    //draw color bar  border
+    //draw color bar border
     int cx = width - 590;
     int cy = height - 210;
     noFill();
@@ -156,7 +161,7 @@ void draw()
         String hoverString = hoverState.getName()+" "+String.format("%,d", hoverState.getValue());
         float x = mouseX + 15;
         float y = mouseY;
-        float w = textWidth(hoverString)+10;
+        float w = textWidth(hoverString)+5;
         float h = 16;
 
         fill(255,255,200);
@@ -166,19 +171,78 @@ void draw()
         fill(50,50,0);
         text(hoverString, x+5,y+13);
     }
+
+    //drawing displayed tweet stuff
+    if(curTweeter != null)
+    {
+        PImage twPic = loadImage(curTweeter.getImgURL().toString());
+        String twTweet = curTweeter.getTweet();
+
+        //tweet display box
+        float twx = width/2 - 150;
+        float twy = height*0.84375;
+        float tww = 300;
+        float twh = 100;
+        float twr = 50;
+
+        beginShape();
+        smooth();
+        fill(135,206,250);
+        strokeWeight(2);
+        stroke(99,99,99);
+        vertex(twx, twy + twr); //top of left side
+        bezierVertex(twx, twy, twx, twy, twx + twr, twy); //top left corner
+        vertex(twx + tww - twr, twy); //right of top side
+        bezierVertex(twx + tww, twy, twx + tww, twy, twx + tww, twy + twr); //top right corner
+        vertex(twx + tww, twy + twh - twr); //bottom of right side
+        bezierVertex(twx + tww, twy + twh, twx + tww, twy + twh, twx + tww - twr, twy + twh); //bottom right corner
+        vertex(twx + twr, twy + twh); //left of bottom side
+        bezierVertex(twx, twy + twh, twx, twy + twh, twx, twy + twh - twr); //bottom left corner
+        endShape(CLOSE);
+
+        twPic.resize(84,0);
+        image(twPic, twx+12, twy+8);
+        //TODO: round image border
+        fill(0,0,0);
+        text(twTweet, twx+100, twy+10, 190, 80);
+
+    }
 }
 
 
 void mousePressed()
 {
+    //trasform mouse coords to account for the transformation applied to the map
+    int mX = round(float(mouseX)/mapScale) - offsetX;
+    int mY = round(float(mouseY)/mapScale) - offsetY;
+    for(int i=0;i<STATE_NAMES.length;i+=2)
+    {
+        State s = (State)states.get(STATE_NAMES[i]);
+        if(s.getName().equals("Alaska") || s.getName().equals("Hawaii"))
+        {
+            if(s.isNear(mX, mY) && s.sizeTw() > 0)
+            {
+                curTweeter = s.removeTw();
+                break;
+            }
+        }
+        else
+        {
+            if(s.hover(mX,mY) && s.sizeTw() > 0)
+            {
+                curTweeter = s.removeTw();
+                break;
+            }
+        }
+    }
 }
 
 void mouseMoved()
 {
     hoverState = null;
 
-    //trasform mouse coords to account for the transformation applied to the map;
-    int mX = round(float(mouseX)/mapScale) -offsetX;
+    //trasform mouse coords to account for the transformation applied to the map
+    int mX = round(float(mouseX)/mapScale) - offsetX;
     int mY = round(float(mouseY)/mapScale) - offsetY;
     for(int i=0;i<STATE_NAMES.length;i+=2)
     {
@@ -278,16 +342,15 @@ void _calcColorStates()
 
 
 /**
- * State class to hold state data, hold color, and perform hover
- * operations
+ * State class to hold state data, hold color, and perform hover operations
+ *
  */
  class State
  {
     Rectangle bounds;
     String name;
-    Polygon [] polygons;
+    Queue<Tweeter> tweets = new LinkedList<Tweeter>();
     PShape pShape;
-    Rectangle [] rectangles;
     int value;
     color c;
 
@@ -398,65 +461,107 @@ void _calcColorStates()
                 (float)(r.getX()+r.getWidth()),(float)(r.getY()+r.getHeight()),
                 (float) r.getX(),(float)(r.getY()+r.getHeight()));
     }
+
+    public boolean addTw(Tweeter twt)
+    {
+        return tweets.add(twt);
+    }
+
+    public Tweeter removeTw()
+    {
+        return tweets.remove();
+    }
+
+    public int sizeTw()
+    {
+        return tweets.size();
+    }
  }
+
+/**
+ * Tweeter class to hold profile image URL and tweet
+ *
+ */
+class Tweeter
+{
+    String tweet;
+    URL imageURL;
+
+    public Tweeter(URL imgURL, String tweet)
+    {
+        imageURL = imgURL;
+        this.tweet = tweet;
+    }
+
+    public URL getImgURL()
+    {
+        return imageURL;
+    }
+
+    public String getTweet()
+    {
+        return tweet;
+    }
+}
 
 
  // Initial connection
- void connectTwitter()
- {
-     twitter.setOAuthConsumer(OAuthConsumerKey, OAuthConsumerSecret);
-     AccessToken accessToken = loadAccessToken();
-     twitter.setOAuthAccessToken(accessToken);
- }
+void connectTwitter()
+{
+    twitter.setOAuthConsumer(OAuthConsumerKey, OAuthConsumerSecret);
+    AccessToken accessToken = loadAccessToken();
+    twitter.setOAuthAccessToken(accessToken);
+}
 
- // Loading up the access token
- private static AccessToken loadAccessToken()
- {
-     return new AccessToken(AccessToken, AccessTokenSecret);
- }
+// Loading up the access token
+private static AccessToken loadAccessToken()
+{
+    return new AccessToken(AccessToken, AccessTokenSecret);
+}
 
- // This listens for new tweet
- StatusListener listener = new StatusListener()
- {
-     public void onStatus(Status status)
-     {
+ // This listens for new tweets
+StatusListener listener = new StatusListener()
+{
+    public void onStatus(Status status)
+    {
 
-         //println(status.getUser().getName() + " says:  " + status.getText());      //debuggery
-         //println("country :  " + status.getUser().getLocation());                  //debuggery
+        //println(status.getUser().getName() + " says:  " + status.getText());      //debuggery
+        //println("country :  " + status.getUser().getLocation());                  //debuggery
 
-         for(int i=0;i<STATE_NAMES.length;i+=2)
-         {
-             if(status.getUser().getLocation() != null)
-             {
-                 if (status.getUser().getLocation().contains(STATE_NAMES[i]) || status.getUser().getLocation().contains(STATE_NAMES[i+1]))
-                 {
-                     State s = (State)states.get(STATE_NAMES[i]);
-                     s.value++;
-                     println(s.name + " :  " + s.value);
+        for(int i=0;i<STATE_NAMES.length;i+=2)
+        {
+            if(status.getUser().getLocation() != null)
+            {
+                if (status.getUser().getLocation().contains(STATE_NAMES[i]) || status.getUser().getLocation().contains(STATE_NAMES[i+1]))
+                {
+                    State s = (State)states.get(STATE_NAMES[i]);
+                    s.value++;
+                    println(s.name + " :  " + s.value);
 
-                     if(minValue <= s.value) minValue = s.value+1;
-                 }
-             }
+                    if(minValue <= s.value) minValue = s.value+1;
+                    s.addTw(new Tweeter(status.getUser().getProfileImageURL(), status.getUser().getName() + ": " + status.getText()));
+                }
+            }
 
-         }
-     }
+        }
+    }
 
-     public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice)
-     {
-         //println("Got a status deletion notice id:" + statusDeletionNotice.getStatusId());
-     }
-     public void onTrackLimitationNotice(int numberOfLimitedStatuses)
-     {
-         //println("Got track limitation notice:" + numberOfLimitedStatuses);
-     }
-     public void onScrubGeo(long userId, long upToStatusId)
-     {
-         System.out.println("Got scrub_geo event userId:" + userId + " upToStatusId:" + upToStatusId);
-     }
+    public void onDeletionNotice(StatusDeletionNotice statusDeletionNotice)
+    {
+        //println("Got a status deletion notice id:" + statusDeletionNotice.getStatusId());
+    }
+    public void onTrackLimitationNotice(int numberOfLimitedStatuses)
+    {
+        //println("Got track limitation notice:" + numberOfLimitedStatuses);
+    }
+    public void onScrubGeo(long userId, long upToStatusId)
+    {
+        System.out.println("Got scrub_geo event userId:" + userId + " upToStatusId:" + upToStatusId);
+    }
 
-     public void onException(Exception ex)
-     {
-         ex.printStackTrace();
-     }
- }
+    public void onException(Exception ex)
+    {
+        ex.printStackTrace();
+    }
+};
 
