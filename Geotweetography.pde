@@ -39,7 +39,6 @@ Tweeter hoverTweet = null;
 
 //current tweets in sidebar
 LinkedList<Tweeter> sideTweets = new LinkedList<Tweeter>();
-PImage sideTwImgs[] = new PImage[6];
 State sideState = null;
 int sideX = 689;
 PFont sideFont;
@@ -192,28 +191,9 @@ void draw()
         int ste = sideTweets.size();
         for(int index = 0; index < ste; index++)
         {
-            try
-            {
-               if(sideState.getSideUpdate())
-                {
-                    sideTwImgs[ste - index - 1] = loadImage(sideTweets.get(ste - index - 1).getImgURL().toString());
-                    sideTwImgs[ste - index - 1].resize(78,0);
-                }
-            }
-            catch(Exception e)
-            {
-                sideTwImgs[ste - index - 1] = loadImage("defaultTweeter.png");
-                println(e.toString());
-            }
-            finally
-            {
-                if(sideTwImgs[ste - index - 1] != null)
-                {
-                    image(sideTwImgs[ste - index - 1], sideTwX+500-500*trans, sideTwY);
-                    text(sideTweets.get(ste - index - 1).getTweet(), sideTwX+90+500-500*trans, sideTwY, 330, 60);
-                    sideTwY += 103;
-                }
-            }
+            image(sideTweets.get(ste - index - 1).getImg(), sideTwX+500-500*trans, sideTwY);
+            text(sideTweets.get(ste - index - 1).getTweet(), sideTwX+90+500-500*trans, sideTwY, 330, 60);
+            sideTwY += 103;
         }
         sideState.setSideUpdate(false);
     }
@@ -675,17 +655,17 @@ void _calcColorStates()
 class Tweeter
 {
     String tweet;
-    URL imageURL;
+    PImage profileImage;
 
-    public Tweeter(URL imgURL, String tweet)
+    public Tweeter(PImage profileImage, String tweet)
     {
-        imageURL = imgURL;
+        this.profileImage = profileImage;
         this.tweet = tweet;
     }
 
-    public URL getImgURL()
+    public PImage getImg()
     {
-        return imageURL;
+        return profileImage;
     }
 
     public String getTweet()
@@ -733,7 +713,17 @@ StatusListener listener = new StatusListener()
                     {
                         s.removeTw();
                     }
-                    s.addTw(new Tweeter(status.getUser().getProfileImageURL(), status.getUser().getName() + ": " + status.getText()));
+                    PImage twImg;
+                    try
+                    {
+                        twImg = loadImage(status.getUser().getProfileImageURL().toString());
+                        twImg.resize(78,0);
+                    }
+                    catch(Exception e)
+                    {
+                        twImg = loadImage("defaultTweeter.png");
+                    }
+                    s.addTw(new Tweeter(twImg, status.getUser().getName() + ": " + status.getText()));
                     s.setSideUpdate(true);
                 }
             }
