@@ -91,6 +91,10 @@ boolean playb = false;
 boolean init = false;
 PImage play, pause;
 
+//keyword spot
+PImage keyw;
+String keyword = "Keyword...";
+
 void setup()
 {
     mainMap = loadShape("Blank_US_Map.svg");
@@ -100,6 +104,7 @@ void setup()
     moImage.resize(330,0);
     play = loadImage("play.png");
     pause = loadImage("pause.png");
+    keyw = loadImage("keyword.png");
     states = new HashMap(STATE_NAMES.length);
     for(int i=0;i<STATE_NAMES.length;i+=2)
     {
@@ -194,60 +199,16 @@ void draw()
 
     }
 
-    //drawing displayed tweet stuff
-    //~ if(curTweeter != null)
-    //~ {
-        //~ PImage twPic = loadImage(curTweeter.getImgURL().toString());
-        //~ String twTweet = curTweeter.getTweet();
-//~
-        //~ //tweet display box
-        //~ float twx = width/2 - 150;
-        //~ float twy = height*0.84375;
-        //~ float tww = 300;
-        //~ float twh = 100;
-        //~ float twr = 50;
-//~
-        //~ smooth();
-        //~ fill(135,206,250);
-        //~ strokeWeight(2);
-        //~ stroke(99,99,99);
-        //~ beginShape();
-        //~ vertex(twx, twy + twr); //top of left side
-        //~ bezierVertex(twx, twy, twx, twy, twx + twr, twy); //top left corner
-        //~ vertex(twx + tww - twr, twy); //right of top side
-        //~ bezierVertex(twx + tww, twy, twx + tww, twy, twx + tww, twy + twr); //top right corner
-        //~ vertex(twx + tww, twy + twh - twr); //bottom of right side
-        //~ bezierVertex(twx + tww, twy + twh, twx + tww, twy + twh, twx + tww - twr, twy + twh); //bottom right corner
-        //~ vertex(twx + twr, twy + twh); //left of bottom side
-        //~ bezierVertex(twx, twy + twh, twx, twy + twh, twx, twy + twh - twr); //bottom left corner
-        //~ endShape(CLOSE);
-//~
-        //~ twPic.resize(84,0);
-        //~ image(twPic, twx+12, twy+8);
-//~
-        //~ //image border
-        //~ noFill();
-        //~ stroke(211,211,211);
-        //~ twx += 12;
-        //~ twy += 8;
-        //~ tww = 84;
-        //~ twh = tww;
-        //~ twr = 10;
-        //~ beginShape();
-        //~ vertex(twx, twy + twr); //top of left side
-        //~ bezierVertex(twx, twy, twx, twy, twx + twr, twy); //top left corner
-        //~ vertex(twx + tww - twr, twy); //right of top side
-        //~ bezierVertex(twx + tww, twy, twx + tww, twy, twx + tww, twy + twr); //top right corner
-        //~ vertex(twx + tww, twy + twh - twr); //bottom of right side
-        //~ bezierVertex(twx + tww, twy + twh, twx + tww, twy + twh, twx + tww - twr, twy + twh); //bottom right corner
-        //~ vertex(twx + twr, twy + twh); //left of bottom side
-        //~ bezierVertex(twx, twy + twh, twx, twy + twh, twx, twy + twh - twr); //bottom left corner
-        //~ endShape(CLOSE);
-//~
-        //~ //display tweet text
-        //~ fill(0,0,0);
-        //~ text(twTweet, twx+100, twy+10, 190, 80);
-    //~ }
+    //play button
+    if(playb) image(play,30,730);
+    else image(pause,30,730);
+
+    //keyword    
+    image(keyw,110,730);2
+    fill(255, 255, 255, 255);
+    textSize(30);
+    text(keyword, 125, 770);
+    textSize(12);
 }
 
 
@@ -255,7 +216,7 @@ void mousePressed()
 {
     if(mouseX > 25 && mouseX < 100 && mouseY > 725 && mouseY < 790){
         playb = !playb;
-        if(play && !init){
+        if(playb && !init){
           connectTwitter();
           twitter.addListener(listener);
           twitter.sample();
@@ -583,7 +544,7 @@ StatusListener listener = new StatusListener()
 {
     public void onStatus(Status status)
     {
-      if(play){
+      if(playb){
         //println(status.getUser().getName() + " says:  " + status.getText());      //debuggery
         //println("country :  " + status.getUser().getLocation());                  //debuggery
 
