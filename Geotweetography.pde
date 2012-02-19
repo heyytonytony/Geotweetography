@@ -106,6 +106,9 @@ String curs = "";
 int ci = 0;
 boolean authed = false;
 
+//transition
+float trans = 0;
+
 void setup()
 {
     mainMap = loadShape("Blank_US_Map.svg");
@@ -153,28 +156,32 @@ void draw()
     }
 
     //shrink map if sidebar is up, display sidebar and tweets
-    if(sideUp)
-    {
-        pushMatrix();
-        scale(0.6);
-        translate(0, height/2 - offsetY/2);
-
-        pushMatrix();
-        resetMatrix();
-        image(sideImage, sideX, 0);
-        sideFont = createFont("Gill Sans MT",66);
-        textFont(sideFont);
-        fill(33,33,33);
-        text(sideState.getName(),sideX+61,110);
-        textSize(20);
-        text("Tweets: "+sideState.getValue(),sideX+56,140);
-
-        //populate with up to 6 most recent tweets
-
-        //TODO
-
-        popMatrix();
+    if(sideUp){
+        if(trans < 1) trans += 0.02;
     }
+    else if(trans > 0) trans -= 0.02;
+    
+    pushMatrix();
+    scale(1-(trans*0.4));
+    translate(0, trans*(height/2 - offsetY/2));
+
+    pushMatrix();
+    resetMatrix();
+    image(sideImage, sideX+15+500-500*trans, 0);
+    sideFont = createFont("Gill Sans MT",66);
+    textFont(sideFont);
+    fill(33,33,33);
+    textSize(20);
+    if(sideUp){
+      text(sideState.getName(),sideX+61+500-500*trans,110);
+      textSize(20);
+      text("Tweets: "+sideState.getValue(),sideX+56+500-500*trans,140);
+    }
+    //populate with up to 6 most recent tweets
+
+    //TODO
+
+    popMatrix();
 
     if(hoverState != null)
     {
@@ -248,8 +255,7 @@ void draw()
 
     }
 
-    if(sideUp)
-        popMatrix();
+    popMatrix();
 
     //play button
     if(!playb) image(play,30,730);
@@ -270,7 +276,7 @@ void draw()
     else ci++;
     textSize(18);
 
-    image(title,300,0);
+    image(title,300-100*trans,0);
 }
 
 
@@ -294,7 +300,7 @@ void mousePressed()
     {
         keys = false;
         //trasform mouse coords to account for the transformation applied to the map
-        if(!sideUp)
+        if(trans == 0)
         {
             int mX = round(float(mouseX)/mapScale) - offsetX;
             int mY = round(float(mouseY)/mapScale) - offsetY;
