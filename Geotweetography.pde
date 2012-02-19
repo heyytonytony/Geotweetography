@@ -52,7 +52,7 @@ float mapScale = 0.7;
 
 //intial values for data range
 int maxValue = 0;
-int minValue = 0;
+int minValue = 1;
 
 //alpha value assign to colors (used to create a fadded/muted effect)
 int standardAlpha = 180;
@@ -63,6 +63,7 @@ PImage bgImage;
 //mouseover image
 PImage moImage;
 PImage moImage2;
+PImage title;
 PImage over;
 
 //sidebar image
@@ -112,6 +113,7 @@ void setup()
     bgImage = loadImage("background4.png");
     moImage = loadImage("mouseoverx.png");
     moImage2 = loadImage("mouseover2.png");
+    title = loadImage("title.png");
     over = loadImage("overlay.png");
     moImage.resize(330,0);
     moImage2.resize(330,0);
@@ -267,7 +269,7 @@ void draw()
     else ci++;
     textSize(18);
 
-
+    image(title,300,0);
 }
 
 
