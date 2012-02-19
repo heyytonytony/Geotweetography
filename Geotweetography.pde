@@ -52,7 +52,7 @@ float mapScale = 0.7;
 
 //intial values for data range
 int maxValue = 0;
-int minValue = 20;
+int minValue = 0;
 
 //alpha value assign to colors (used to create a fadded/muted effect)
 int standardAlpha = 180;
@@ -329,8 +329,8 @@ void mouseMoved()
 void keyReleased(){  
   if(keys && key == ENTER || key == RETURN) {
     keys = false;
+    keywords[0] = keyword;
     if(authed){
-      keywords[0] = keyword;
       if (keyword == "") twitter.sample();
       else twitter.filter(new FilterQuery().track(keywords));
     }
