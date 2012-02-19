@@ -43,6 +43,7 @@ PImage sideTwImgs[] = new PImage[6];
 State sideState = null;
 int sideX = 689;
 PFont sideFont;
+boolean sideUpdate = false;
 
 //offsets for drawing the map
 int offsetX = 395;
@@ -191,19 +192,32 @@ void draw()
             {
                 sideTweets.remove();
             }
-            sideTweets.add(sideState.removeTw());
+            sideUpdate = sideTweets.add(sideState.removeTw());
         }
 
         //display tweets
         int sideTwX = sideX+71, sideTwY = 155;
-        for(int index = 0; index < sideTweets.size(); index++)
+        int ste = sideTweets.size();
+        for(int index = 0; index < ste; index++)
         {
-            //something broken here, NPE
-            sideTwImgs[sideTweets.size() - index - 1] = loadImage(sideTweets.get(sideTweets.size() - index - 1).getImgURL().toString());
-            sideTwImgs[sideTweets.size() - index - 1].resize(78,0);
-            image(sideTwImgs[sideTweets.size() - index - 1], sideTwX, sideTwY);
-            text(sideTweets.get(sideTweets.size() - index - 1).getTweet(), sideTwX+90, sideTwY, 330, 60);
-            sideTwY += 103;
+            try
+            {
+                if(sideUpdate)
+                {
+                    sideTwImgs[ste - index - 1] = loadImage(sideTweets.get(ste - index - 1).getImgURL().toString());
+                    sideTwImgs[ste - index - 1].resize(78,0);
+                }
+            }
+            catch(Exception e)
+            {
+                sideTwImgs[ste - index - 1] = loadImage("defaultTweeter.png");
+            }
+            finally
+            {
+                image(sideTwImgs[ste - index - 1], sideTwX, sideTwY);
+                text(sideTweets.get(ste - index - 1).getTweet(), sideTwX+90, sideTwY, 330, 60);
+                sideTwY += 103;
+            }
 
         }
     }
