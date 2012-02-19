@@ -183,7 +183,8 @@ void draw()
         text(sideState.getName(),sideX+76+500-500*trans,110);
         textSize(20);
         text("Tweets: "+sideState.getValue(),sideX+71+500-500*trans,140);
-        textSize(13);
+        textSize(15);
+        textLeading(14);
 
         //populate with up to 6 most recent tweets
         //pull tweets
@@ -266,7 +267,7 @@ void draw()
         textLeading(14);
         if(hoverTweet != null)
         {
-            text(hoverTweet.getTweet(), x+105, y+40, 210, 70);
+            text(hoverTweet.getTweet(), x+105, y+40, 210, 80);
         }
         else
         {
@@ -302,6 +303,7 @@ void draw()
     {
         fill(214,214,214);
         text(frameRate,0,14);
+        text(frameCount,5,30);
     }
 }
 
@@ -529,12 +531,14 @@ void _calcColorStates()
     void draw()
     {
         pShape.disableStyle();
+        smooth();
         stroke(255,255,255,255);
         strokeWeight(1);
         fill(this.c);
         shape(pShape,offsetX,offsetY);
 
         stroke(255,0,0);
+        noSmooth();
     }
 
     String getName()
