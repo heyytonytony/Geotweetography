@@ -62,6 +62,7 @@ PImage bgImage;
 
 //mouseover image
 PImage moImage;
+PImage moImage2;
 
 //dynamic image of color bar
 PImage colorBar;
@@ -92,19 +93,23 @@ boolean init = false;
 PImage play, pause;
 
 //keyword spot
-PImage keyw;
+boolean keys = false;
+PImage keyw, keyw2;
 String keyword = "Keyword...";
 
 void setup()
 {
     mainMap = loadShape("Blank_US_Map.svg");
     size(1200,800);
-    bgImage = loadImage("background3.png");
+    bgImage = loadImage("background4.png");
     moImage = loadImage("mouseoverx.png");
+    moImage2 = loadImage("mouseover2.png");
     moImage.resize(330,0);
+    moImage2.resize(330,0);
     play = loadImage("play.png");
     pause = loadImage("pause.png");
     keyw = loadImage("keyword.png");
+    keyw2 = loadImage("keyword2.png");
     states = new HashMap(STATE_NAMES.length);
     for(int i=0;i<STATE_NAMES.length;i+=2)
     {
@@ -121,7 +126,8 @@ void draw()
 {
     _calcColorStates();
     _calcColorBar();
-
+    background(0); 
+    
     //sleep on the first frame so you don't get that awkward, partially drawn frame
     if(first)
     {
@@ -132,10 +138,17 @@ void draw()
         catch(Exception e){}
         first = false;
     }
+    
+    if(hoverState != null)
+    {
+        float x = mouseX + 15;
+        float y = mouseY;
+        image(moImage2, x, y);
+    }
 
-    //clear the screen
-    background(255);
-
+    //draw the bgImage here so it is mulitplied with already-drawn graphics
+    image(bgImage,0,0);
+    
     //push current coordinate system to apply scale effect
     pushMatrix();
 
@@ -147,10 +160,11 @@ void draw()
     {
         ((State)iter.next()).draw();
     }
-
+    
+    
     //pop old coordinate system
     popMatrix();
-
+    
     //draw color bar border
     int cx = width - 590;
     int cy = height - 210;
@@ -169,9 +183,6 @@ void draw()
     String maxValueString = String.format("%,d", maxValue);
     text(maxValueString,cx + colorBarWidth - textWidth(maxValueString),cy + colorBarHeight +15);
 
-    //draw the bgImage here so it is mulitplied with already-drawn graphics
-    blend(bgImage,0,0,width,height,0,0,width,height,MULTIPLY);
-
     //draw hover graphics here so they are not part of the multiply blending
     if(hoverState != null)
     {
@@ -185,7 +196,7 @@ void draw()
         fill(230,230,230);
         textSize(18);
         text(hoverString, x+60, y+30);
-        text("Latest: ", x+40, y+55);
+        text("Latest: ", x+43, y+55);
         textSize(13);
         textLeading(14);
         if(hoverTweet != null)
@@ -200,11 +211,12 @@ void draw()
     }
 
     //play button
-    if(playb) image(play,30,730);
+    if(!playb) image(play,30,730);
     else image(pause,30,730);
 
     //keyword    
-    image(keyw,110,730);2
+    if(!keys) image(keyw,110,730);
+    else image(keyw2,100,720);
     fill(255, 255, 255, 255);
     textSize(30);
     text(keyword, 125, 770);
@@ -222,6 +234,9 @@ void mousePressed()
           twitter.sample();
           init = true;
         }
+    }
+    else if(mouseX > 100 && mouseX < 350 && mouseY > 725 && mouseY < 790){
+        keys = !keys;
     }
     else{
       //trasform mouse coords to account for the transformation applied to the map
