@@ -65,6 +65,10 @@ PImage moImage;
 PImage moImage2;
 PImage over;
 
+//sidebar image
+PImage sideImage;
+boolean sideUp = false;
+
 //dynamic image of color bar
 PImage colorBar;
 int colorBarWidth = 250;
@@ -115,6 +119,7 @@ void setup()
     pause = loadImage("pause.png");
     keyw = loadImage("keyword.png");
     keyw2 = loadImage("keyword2.png");
+    sideImage = loadImage("sidebar.png");
     states = new HashMap(STATE_NAMES.length);
     for(int i=0;i<STATE_NAMES.length;i+=2)
     {
@@ -131,8 +136,8 @@ void draw()
 {
     _calcColorStates();
     _calcColorBar();
-    background(0); 
-    
+    background(0);
+
     //sleep on the first frame so you don't get that awkward, partially drawn frame
     if(first)
     {
@@ -143,7 +148,19 @@ void draw()
         catch(Exception e){}
         first = false;
     }
-    
+
+    //shrink map if sidebar is up, display sidebar
+    if(sideUp)
+    {
+        pushMatrix();
+        scale(0.6);
+        translate(0, height/2 - offsetY/2);
+        pushMatrix();
+        resetMatrix();
+        image(sideImage, 789, 0);
+        popMatrix();
+    }
+
     if(hoverState != null)
     {
         float x = mouseX + 15;
@@ -151,9 +168,9 @@ void draw()
         image(moImage2, x, y);
     }
 
-    //draw the bgImage here so it is mulitplied with already-drawn graphics
+    //draw the bgImage
     image(bgImage,0,0);
-    
+
     //push current coordinate system to apply scale effect
     pushMatrix();
 
@@ -165,13 +182,12 @@ void draw()
     {
         ((State)iter.next()).draw();
     }
-    
-    
+
     //pop old coordinate system
     popMatrix();
-    
+
     image(over,0,0);
-    
+
     //draw color bar border
     int cx = width - 590;
     int cy = height - 210;
@@ -217,11 +233,14 @@ void draw()
 
     }
 
+    if(sideUp)
+        popMatrix();
+
     //play button
     if(!playb) image(play,30,730);
     else image(pause,30,730);
 
-    //keyword    
+    //keyword
     if(!keys) image(keyw,110,730);
     else image(keyw2,100,720);
     fill(255, 255, 255, 255);
@@ -261,26 +280,9 @@ void mousePressed()
       //trasform mouse coords to account for the transformation applied to the map
       int mX = round(float(mouseX)/mapScale) - offsetX;
       int mY = round(float(mouseY)/mapScale) - offsetY;
-      for(int i=0;i<STATE_NAMES.length;i+=2)
-      {
-          State s = (State)states.get(STATE_NAMES[i]);
-          if(s.getName().equals("Alaska") || s.getName().equals("Hawaii"))
-          {
-              if(s.isNear(mX, mY) && s.sizeTw() > 0)
-              {
-                  curTweeter = s.removeTw();
-                  break;
-              }
-          }
-          else
-          {
-              if(s.hover(mX,mY) && s.sizeTw() > 0)
-              {
-                  curTweeter = s.removeTw();
-                  break;
-              }
-          }
-      }
+
+      sideUp = !sideUp;
+
     }
 }
 
@@ -289,8 +291,17 @@ void mouseMoved()
     hoverState = null;
 
     //trasform mouse coords to account for the transformation applied to the map
-    int mX = round(float(mouseX)/mapScale) - offsetX;
-    int mY = round(float(mouseY)/mapScale) - offsetY;
+    int mX, mY;
+    if(sideUp)
+    {
+        mX = round(float(mouseX)/mapScale/0.6) - offsetX;
+        mY = round(float(mouseY)/mapScale/0.6) - offsetY - height/2;
+    }
+    else
+    {
+        mX = round(float(mouseX)/mapScale) - offsetX;
+        mY = round(float(mouseY)/mapScale) - offsetY;
+    }
     for(int i=0;i<STATE_NAMES.length;i+=2)
     {
         State s = (State)states.get(STATE_NAMES[i]);
