@@ -107,6 +107,9 @@ String curs = "";
 int ci = 0;
 boolean authed = false;
 
+//transition
+float trans = 0;
+
 void setup()
 {
     mainMap = loadShape("Blank_US_Map.svg");
@@ -124,6 +127,7 @@ void setup()
     keyw2 = loadImage("keyword2.png");
     sideImage = loadImage("sidebar.png");
     states = new HashMap(STATE_NAMES.length);
+    minValue = 1;
     for(int i=0;i<STATE_NAMES.length;i+=2)
     {
         states.put(STATE_NAMES[i], new State(STATE_NAMES[i], mainMap.getChild(STATE_NAMES[i+1])));
@@ -153,21 +157,27 @@ void draw()
     }
 
     //shrink map if sidebar is up, display sidebar and tweets
+    if(sideUp && trans < 1)
+        trans += 0.02;
+    else if(!sideUp && trans > 0)
+        trans -= 0.02;
+
+    pushMatrix();
+    scale(1-(trans*0.4));
+    translate(0, trans*(height/2 - offsetY/2));
+
+    pushMatrix();
+    resetMatrix();
+    image(sideImage, sideX+15+500-500*trans, 0);
+    sideFont = createFont("Gill Sans MT",66);
+    textFont(sideFont);
+    fill(33,33,33);
+
     if(sideUp)
     {
-        pushMatrix();
-        scale(0.6);
-        translate(0, height/2 - offsetY/2);
-
-        pushMatrix();
-        resetMatrix();
-        image(sideImage, sideX, 0);
-        sideFont = createFont("Gill Sans MT",66);
-        textFont(sideFont);
-        fill(33,33,33);
-        text(sideState.getName(),sideX+61,110);
+        text(sideState.getName(),sideX+76+500-500*trans,110);
         textSize(20);
-        text("Tweets: "+sideState.getValue(),sideX+56,140);
+        text("Tweets: "+sideState.getValue(),sideX+71+500-500*trans,140);
         textSize(13);
 
         //populate with up to 6 most recent tweets
@@ -182,20 +192,20 @@ void draw()
         }
 
         //display tweets
-        int sideTwX = sideX+71, sideTwY = 160;
+        int sideTwX = sideX+71, sideTwY = 155;
         for(int index = 0; index < sideTweets.size(); index++)
         {
             //something broken here, NPE
-            sideTwImgs[sideTweets.size() - index - 1] = loadImage(sideTweets.get(index).getImgURL().toString());
-            sideTwImgs[sideTweets.size() - index - 1].resize(84,0);
+            sideTwImgs[sideTweets.size() - index - 1] = loadImage(sideTweets.get(sideTweets.size() - index - 1).getImgURL().toString());
+            sideTwImgs[sideTweets.size() - index - 1].resize(78,0);
             image(sideTwImgs[sideTweets.size() - index - 1], sideTwX, sideTwY);
-            text(sideTweets.size()+"    "+sideTweets.get(sideTweets.size() - index - 1).getTweet(), sideTwX+90, sideTwY, 330, 60);
-            sideTwY += 90;
+            text(sideTweets.get(sideTweets.size() - index - 1).getTweet(), sideTwX+90, sideTwY, 330, 60);
+            sideTwY += 103;
 
         }
-
-        popMatrix();
     }
+    popMatrix();
+    textSize(20);
 
     if(hoverState != null)
     {
@@ -269,8 +279,7 @@ void draw()
 
     }
 
-    if(sideUp)
-        popMatrix();
+    popMatrix();
 
     //play button
     if(!playb) image(play,30,730);
@@ -291,7 +300,7 @@ void draw()
     else ci++;
     textSize(18);
 
-    image(title,300,0);
+    image(title,300-100*trans,0);
 }
 
 
@@ -321,7 +330,7 @@ void mousePressed()
             mX = round(float(mouseX)/mapScale/0.6) - offsetX;
             mY = round(float(mouseY)/mapScale/0.6) - offsetY - height/2;
         }
-        else
+        else// if(trans == 0)
         {
             mX = round(float(mouseX)/mapScale) - offsetX;
             mY = round(float(mouseY)/mapScale) - offsetY;
@@ -403,6 +412,7 @@ void keyReleased(){
     if(authed){
       if (keyword == "") twitter.sample();
       else twitter.filter(new FilterQuery().track(keywords));
+      setup();
     }
   }
   if(keys && key == BACKSPACE && keyword.length() > 0) keyword = keyword.substring(0,keyword.length()-1);
