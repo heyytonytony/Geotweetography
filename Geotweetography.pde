@@ -215,8 +215,8 @@ void draw()
             }
             finally
             {
-                image(sideTwImgs[ste - index - 1], sideTwX, sideTwY);
-                text(sideTweets.get(ste - index - 1).getTweet(), sideTwX+90, sideTwY, 330, 60);
+                image(sideTwImgs[ste - index - 1], sideTwX+500-500*trans, sideTwY);
+                text(sideTweets.get(ste - index - 1).getTweet(), sideTwX+90+500-500*trans, sideTwY, 330, 60);
                 sideTwY += 103;
             }
         }
