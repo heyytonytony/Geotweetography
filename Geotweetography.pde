@@ -38,9 +38,10 @@ State hoverState = null;
 Tweeter hoverTweet = null;
 
 //current tweets in sidebar
-Queue<Tweeter> sideTweets = new LinkedList<Tweeter>();
+LinkedList<Tweeter> sideTweets = new LinkedList<Tweeter>();
+PImage sideTwImgs[] = new PImage[6];
 State sideState = null;
-float sideX = 689;
+int sideX = 689;
 PFont sideFont;
 
 //offsets for drawing the map
@@ -167,10 +168,31 @@ void draw()
         text(sideState.getName(),sideX+61,110);
         textSize(20);
         text("Tweets: "+sideState.getValue(),sideX+56,140);
+        textSize(13);
 
         //populate with up to 6 most recent tweets
+        //pull tweets
+        if(sideState.sizeTw() > 0)
+        {
+            if(sideTweets.size() == 6)
+            {
+                sideTweets.remove();
+            }
+            sideTweets.add(sideState.removeTw());
+        }
 
-        //TODO
+        //display tweets
+        int sideTwX = sideX+71, sideTwY = 160;
+        for(int index = 0; index < sideTweets.size(); index++)
+        {
+            //something broken here, NPE
+            sideTwImgs[sideTweets.size() - index - 1] = loadImage(sideTweets.get(index).getImgURL().toString());
+            sideTwImgs[sideTweets.size() - index - 1].resize(84,0);
+            image(sideTwImgs[sideTweets.size() - index - 1], sideTwX, sideTwY);
+            text(sideTweets.size()+"    "+sideTweets.get(sideTweets.size() - index - 1).getTweet(), sideTwX+90, sideTwY, 330, 60);
+            sideTwY += 90;
+
+        }
 
         popMatrix();
     }
@@ -293,35 +315,44 @@ void mousePressed()
     {
         keys = false;
         //trasform mouse coords to account for the transformation applied to the map
-        if(!sideUp)
+        int mX, mY;
+        if(sideUp)
         {
-            int mX = round(float(mouseX)/mapScale) - offsetX;
-            int mY = round(float(mouseY)/mapScale) - offsetY;
-            for(int i=0;i<STATE_NAMES.length;i+=2)
-            {
-                State s = (State)states.get(STATE_NAMES[i]);
-                if(s.getName().equals("Alaska") || s.getName().equals("Hawaii"))
-                {
-                    if(s.isNear(mX, mY))
-                    {
-                        sideState = s;
-                        sideUp = !sideUp;
-                        break;
-                    }
-                }
-                else
-                {
-                    if(s.hover(mX,mY))
-                    {
-                        sideState = s;
-                        sideUp = !sideUp;
-                        break;
-                    }
-                }
-            }
+            mX = round(float(mouseX)/mapScale/0.6) - offsetX;
+            mY = round(float(mouseY)/mapScale/0.6) - offsetY - height/2;
         }
         else
-            sideUp = !sideUp;
+        {
+            mX = round(float(mouseX)/mapScale) - offsetX;
+            mY = round(float(mouseY)/mapScale) - offsetY;
+        }
+        for(int i=0;i<STATE_NAMES.length;i+=2)
+        {
+            State s = (State)states.get(STATE_NAMES[i]);
+            if(s.getName().equals("Alaska") || s.getName().equals("Hawaii"))
+            {
+                if(s.isNear(mX, mY))
+                {
+                    sideState = s;
+                    sideUp = true;
+                    break;
+                }
+
+                //clicked outside of any state bound
+                sideUp = false;
+            }
+            else
+            {
+                if(s.hover(mX,mY))
+                {
+                    sideState = s;
+                    sideUp = true;
+                    break;
+                }
+                //clicked outside of any state bound
+                sideUp = false;
+            }
+        }
     }
 }
 
@@ -461,7 +492,7 @@ void _calcColorStates()
  {
     Rectangle bounds;
     String name;
-    Deque<Tweeter> tweets = new LinkedList<Tweeter>();
+    LinkedList<Tweeter> tweets = new LinkedList<Tweeter>();
     PShape pShape;
     int value;
     color c;
@@ -577,6 +608,11 @@ void _calcColorStates()
     public boolean addTw(Tweeter twt)
     {
         return tweets.add(twt);
+    }
+
+    public Tweeter getTw(int index)
+    {
+        return tweets.get(index);
     }
 
     public Tweeter peekLatestTw()
