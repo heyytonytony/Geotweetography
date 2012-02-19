@@ -13,7 +13,7 @@ static String AccessTokenSecret = "nFqBdzuO9PAnNCEJTx5F4l5sTXRTiXxcQLbZ2SjbAxQ";
 
 //Twitter stream
 TwitterStream twitter = new TwitterStreamFactory().getInstance();
-String keywords[] = {};
+String keywords[] = {"lol"};
 
 static String [] STATE_NAMES = new String[] {
     "Alabama", "AL", "Alaska", "AK", "Arizona", "AZ", "Arkansas", "AR", "California", "CA",
@@ -97,6 +97,9 @@ PImage play, pause;
 boolean keys = false;
 PImage keyw, keyw2;
 String keyword = "Keyword...";
+String curs = "";
+int ci = 0;
+boolean authed = false;
 
 void setup()
 {
@@ -223,8 +226,17 @@ void draw()
     else image(keyw2,100,720);
     fill(255, 255, 255, 255);
     textSize(30);
-    text(keyword, 125, 770);
-    textSize(12);
+    if(keys)text(keyword+curs, 125, 770);
+    else text(keyword, 125, 770);
+    if (ci == 12){
+      if(curs == "") curs = "|";
+      else curs = "";
+      ci = 0;
+    }
+    else ci++;
+    textSize(18);
+    
+    
 }
 
 
@@ -235,14 +247,17 @@ void mousePressed()
         if(playb && !init){
           connectTwitter();
           twitter.addListener(listener);
-          twitter.sample();
+          if (keyword == "" || keyword == "Keyword..." ) twitter.sample();
+          else twitter.filter(new FilterQuery().track(keywords));
           init = true;
         }
     }
     else if(mouseX > 100 && mouseX < 350 && mouseY > 725 && mouseY < 790){
         keys = !keys;
+        if(keys && keyword == "Keyword...") keyword = "";
     }
     else{
+      keys = false;
       //trasform mouse coords to account for the transformation applied to the map
       int mX = round(float(mouseX)/mapScale) - offsetX;
       int mY = round(float(mouseY)/mapScale) - offsetY;
@@ -298,6 +313,19 @@ void mouseMoved()
             }
         }
     }
+}
+
+void keyReleased(){  
+  if(keys && key == ENTER || key == RETURN) {
+    keys = false;
+    if(authed){
+      keywords[0] = keyword;
+      if (keyword == "") twitter.sample();
+      else twitter.filter(new FilterQuery().track(keywords));
+    }
+  }
+  if(keys && key == BACKSPACE && keyword.length() > 0) keyword = keyword.substring(0,keyword.length()-1);
+  else if(keys && textWidth(keyword + key) < 120) keyword = keyword + key;
 }
 
 void mouseDragged()
@@ -550,6 +578,7 @@ void connectTwitter()
     twitter.setOAuthConsumer(OAuthConsumerKey, OAuthConsumerSecret);
     AccessToken accessToken = loadAccessToken();
     twitter.setOAuthAccessToken(accessToken);
+    authed = true;
 }
 
 // Loading up the access token
