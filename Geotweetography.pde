@@ -186,7 +186,7 @@ void draw()
 
         //populate with up to 6 most recent tweets
         //pull tweets
-        if(sideState.sizeTw() > 0)
+        if(sideState.sizeTw() > 0 && frameCount%60==0)
         {
             if(sideTweets.size() == 6)
             {
@@ -202,7 +202,7 @@ void draw()
         {
             try
             {
-               if(sideUpdate)
+               if(sideUpdate && frameCount%60==0)
                 {
                     sideTwImgs[ste - index - 1] = loadImage(sideTweets.get(ste - index - 1).getImgURL().toString());
                     sideTwImgs[ste - index - 1].resize(78,0);
@@ -215,12 +215,16 @@ void draw()
             }
             finally
             {
-                image(sideTwImgs[ste - index - 1], sideTwX, sideTwY);
-                text(sideTweets.get(ste - index - 1).getTweet(), sideTwX+90, sideTwY, 330, 60);
-                sideTwY += 103;
+                if(sideTwImgs[ste - index - 1] != null)
+                {
+                    image(sideTwImgs[ste - index - 1], sideTwX, sideTwY);
+                    text(sideTweets.get(ste - index - 1).getTweet(), sideTwX+90, sideTwY, 330, 60);
+                    sideTwY += 103;
+                }
             }
         }
-        sideUpdate = false;
+        if(frameCount%60==0)
+            sideUpdate = false;
     }
     popMatrix();
     textSize(20);
