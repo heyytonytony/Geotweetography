@@ -43,7 +43,6 @@ PImage sideTwImgs[] = new PImage[6];
 State sideState = null;
 int sideX = 689;
 PFont sideFont;
-boolean sideUpdate = false;
 
 //offsets for drawing the map
 int offsetX = 395;
@@ -186,14 +185,7 @@ void draw()
 
         //populate with up to 6 most recent tweets
         //pull tweets
-        if(sideState.sizeTw() > 0 && frameCount%60==0)
-        {
-            if(sideTweets.size() == 6)
-            {
-                sideTweets.remove();
-            }
-            sideUpdate = sideTweets.add(sideState.removeTw());
-        }
+        sideTweets = sideState.getTw();
 
         //display tweets
         int sideTwX = sideX+71, sideTwY = 155;
@@ -202,7 +194,7 @@ void draw()
         {
             try
             {
-               if(sideUpdate && frameCount%60==0)
+               if(sideState.getSideUpdate())
                 {
                     sideTwImgs[ste - index - 1] = loadImage(sideTweets.get(ste - index - 1).getImgURL().toString());
                     sideTwImgs[ste - index - 1].resize(78,0);
@@ -223,8 +215,7 @@ void draw()
                 }
             }
         }
-        if(frameCount%60==0)
-            sideUpdate = false;
+        sideState.setSideUpdate(false);
     }
     popMatrix();
     textSize(20);
@@ -527,6 +518,7 @@ void _calcColorStates()
     Rectangle bounds;
     String name;
     LinkedList<Tweeter> tweets = new LinkedList<Tweeter>();
+    boolean sideUpdate = false;
     PShape pShape;
     int value;
     color c;
@@ -644,9 +636,9 @@ void _calcColorStates()
         return tweets.add(twt);
     }
 
-    public Tweeter getTw(int index)
+    public LinkedList<Tweeter> getTw()
     {
-        return tweets.get(index);
+        return tweets;
     }
 
     public Tweeter peekLatestTw()
@@ -663,6 +655,17 @@ void _calcColorStates()
     {
         return tweets.size();
     }
+
+    public boolean getSideUpdate()
+    {
+        return sideUpdate;
+    }
+
+    public void setSideUpdate(boolean set)
+    {
+        sideUpdate = set;
+    }
+
  }
 
 /**
@@ -726,7 +729,12 @@ StatusListener listener = new StatusListener()
                     println(s.name + " :  " + s.value);
 
                     if(minValue <= s.value) minValue = s.value+1;
+                    if(s.sizeTw() == 6)
+                    {
+                        s.removeTw();
+                    }
                     s.addTw(new Tweeter(status.getUser().getProfileImageURL(), status.getUser().getName() + ": " + status.getText()));
+                    s.setSideUpdate(true);
                 }
             }
 
