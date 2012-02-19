@@ -60,6 +60,7 @@ int standardAlpha = 180;
 
 //background image
 PImage bgImage;
+PImage bgImage2;
 
 //mouseover image
 PImage moImage;
@@ -115,6 +116,7 @@ void setup()
     mainMap = loadShape("Blank_US_Map.svg");
     size(1200,800);
     bgImage = loadImage("background4.png");
+    bgImage2 = loadImage("backb2.png");
     moImage = loadImage("mouseoverx.png");
     moImage2 = loadImage("mouseover2.png");
     title = loadImage("title.png");
@@ -144,6 +146,7 @@ void draw()
     _calcColorStates();
     _calcColorBar();
     background(0);
+    image(bgImage2, 0, 0);
 
     //sleep on the first frame so you don't get that awkward, partially drawn frame
     if(first)
