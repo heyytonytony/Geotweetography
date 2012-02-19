@@ -177,7 +177,7 @@ void draw()
     textFont(sideFont);
     fill(33,33,33);
 
-    if(sideUp)
+    if(sideState != null)
     {
         text(sideState.getName(),sideX+76+500-500*trans,110);
         textSize(20);
@@ -217,8 +217,8 @@ void draw()
             {
                 if(sideTwImgs[ste - index - 1] != null)
                 {
-                    image(sideTwImgs[ste - index - 1], sideTwX, sideTwY);
-                    text(sideTweets.get(ste - index - 1).getTweet(), sideTwX+90, sideTwY, 330, 60);
+                    image(sideTwImgs[ste - index - 1], sideTwX+500-500*trans, sideTwY);
+                    text(sideTweets.get(ste - index - 1).getTweet(), sideTwX+90+500-500*trans, sideTwY, 330, 60);
                     sideTwY += 103;
                 }
             }
