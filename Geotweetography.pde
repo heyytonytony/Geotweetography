@@ -110,6 +110,9 @@ boolean authed = false;
 //transition
 float trans = 0;
 
+//fps display
+boolean fpsOn = false;
+
 void setup()
 {
     mainMap = loadShape("Blank_US_Map.svg");
@@ -294,8 +297,12 @@ void draw()
     textSize(18);
 
     image(title,300-100*trans,0);
-    fill(255,255,255);
-    text(frameRate,0,14);
+
+    if(fpsOn)
+    {
+        fill(214,214,214);
+        text(frameRate,0,14);
+    }
 }
 
 
@@ -400,8 +407,16 @@ void mouseMoved()
     }
 }
 
-void keyReleased(){
-  if(keys && key == ENTER || key == RETURN) {
+void keyPressed()
+{
+    if(key == TAB)
+        fpsOn = !fpsOn;
+}
+
+void keyReleased()
+{
+  if(keys && key == ENTER || key == RETURN)
+  {
     keys = false;
     keywords[0] = keyword;
     if(authed){
