@@ -40,7 +40,8 @@ Tweeter hoverTweet = null;
 //current tweets in sidebar
 Queue<Tweeter> sideTweets = new LinkedList<Tweeter>();
 State sideState = null;
-float sideX = 789;
+float sideX = 689;
+PFont sideFont;
 
 //offsets for drawing the map
 int offsetX = 395;
@@ -158,10 +159,17 @@ void draw()
         pushMatrix();
         resetMatrix();
         image(sideImage, sideX, 0);
-
-        textSize(48);
+        sideFont = createFont("Gill Sans MT",66);
+        textFont(sideFont);
         fill(33,33,33);
-        text("Texas",sideX+61,90);
+        text(sideState.getName(),sideX+61,110);
+        textSize(20);
+        text("Tweets: "+sideState.getValue(),sideX+56,140);
+
+        //populate with up to 6 most recent tweets
+
+        //TODO
+
         popMatrix();
     }
 
@@ -279,7 +287,6 @@ void mousePressed()
         keys = !keys;
         if(keys && keyword == "Keyword...") keyword = "";
     }
-<<<<<<< HEAD
     else
     {
         keys = false;
