@@ -37,11 +37,10 @@ PShape mainMap;
 State hoverState = null;
 Tweeter hoverTweet = null;
 
-//current displayed tweet
-Tweeter curTweeter = null;
-
 //current tweets in sidebar
 Queue<Tweeter> sideTweets = new LinkedList<Tweeter>();
+State sideState = null;
+float sideX = 789;
 
 //offsets for drawing the map
 int offsetX = 395;
@@ -149,15 +148,20 @@ void draw()
         first = false;
     }
 
-    //shrink map if sidebar is up, display sidebar
+    //shrink map if sidebar is up, display sidebar and tweets
     if(sideUp)
     {
         pushMatrix();
         scale(0.6);
         translate(0, height/2 - offsetY/2);
+
         pushMatrix();
         resetMatrix();
-        image(sideImage, 789, 0);
+        image(sideImage, sideX, 0);
+
+        textSize(48);
+        fill(33,33,33);
+        text("Texas",sideX+61,90);
         popMatrix();
     }
 
@@ -254,8 +258,8 @@ void draw()
     }
     else ci++;
     textSize(18);
-    
-    
+
+
 }
 
 
@@ -275,14 +279,40 @@ void mousePressed()
         keys = !keys;
         if(keys && keyword == "Keyword...") keyword = "";
     }
-    else{
-      keys = false;
-      //trasform mouse coords to account for the transformation applied to the map
-      int mX = round(float(mouseX)/mapScale) - offsetX;
-      int mY = round(float(mouseY)/mapScale) - offsetY;
-
-      sideUp = !sideUp;
-
+<<<<<<< HEAD
+    else
+    {
+        keys = false;
+        //trasform mouse coords to account for the transformation applied to the map
+        if(!sideUp)
+        {
+            int mX = round(float(mouseX)/mapScale) - offsetX;
+            int mY = round(float(mouseY)/mapScale) - offsetY;
+            for(int i=0;i<STATE_NAMES.length;i+=2)
+            {
+                State s = (State)states.get(STATE_NAMES[i]);
+                if(s.getName().equals("Alaska") || s.getName().equals("Hawaii"))
+                {
+                    if(s.isNear(mX, mY))
+                    {
+                        sideState = s;
+                        sideUp = !sideUp;
+                        break;
+                    }
+                }
+                else
+                {
+                    if(s.hover(mX,mY))
+                    {
+                        sideState = s;
+                        sideUp = !sideUp;
+                        break;
+                    }
+                }
+            }
+        }
+        else
+            sideUp = !sideUp;
     }
 }
 
@@ -326,7 +356,7 @@ void mouseMoved()
     }
 }
 
-void keyReleased(){  
+void keyReleased(){
   if(keys && key == ENTER || key == RETURN) {
     keys = false;
     keywords[0] = keyword;
