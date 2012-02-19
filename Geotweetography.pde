@@ -244,10 +244,10 @@ void draw()
 
     image(colorBar, cx,cy);
     fill(0,0,0,210);
-    text(String.format("%,d", minValue),cx,cy + colorBarHeight+15);
+    text(String.format("%,d", minValue),cx,cy + colorBarHeight+17);
     fill(0,0,0,210);
     String maxValueString = String.format("%,d", maxValue);
-    text(maxValueString,cx + colorBarWidth - textWidth(maxValueString),cy + colorBarHeight +15);
+    text(maxValueString,cx + colorBarWidth - textWidth(maxValueString),cy + colorBarHeight +17);
 
     //draw hover graphics here so they are not part of the multiply blending
     if(hoverState != null)
@@ -312,10 +312,19 @@ void mousePressed()
 {
     if(mouseX > 25 && mouseX < 100 && mouseY > 725 && mouseY < 790){
         playb = !playb;
+        
+        if(keys){
+          keys = false;
+          keywords[0] = keyword;
+          if(authed){
+            setup();
+          }
+        }
+        
         if(playb && !init){
           connectTwitter();
           twitter.addListener(listener);
-          if (keyword == "" || keyword == "Keyword..." ) twitter.sample();
+          if (keyword == "" || keyword == "Keyword..." || keyword.length() == 0) twitter.sample();
           else twitter.filter(new FilterQuery().track(keywords));
           init = true;
         }
@@ -422,7 +431,7 @@ void keyReleased()
     keys = false;
     keywords[0] = keyword;
     if(authed){
-      if (keyword == "") twitter.sample();
+      if (keyword == "" || keyword.length() == 0) twitter.sample();
       else twitter.filter(new FilterQuery().track(keywords));
       setup();
     }
