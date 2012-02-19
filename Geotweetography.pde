@@ -63,6 +63,7 @@ PImage bgImage;
 //mouseover image
 PImage moImage;
 PImage moImage2;
+PImage over;
 
 //dynamic image of color bar
 PImage colorBar;
@@ -104,6 +105,7 @@ void setup()
     bgImage = loadImage("background4.png");
     moImage = loadImage("mouseoverx.png");
     moImage2 = loadImage("mouseover2.png");
+    over = loadImage("overlay.png");
     moImage.resize(330,0);
     moImage2.resize(330,0);
     play = loadImage("play.png");
@@ -164,6 +166,8 @@ void draw()
     
     //pop old coordinate system
     popMatrix();
+    
+    image(over,0,0);
     
     //draw color bar border
     int cx = width - 590;
