@@ -428,7 +428,7 @@ void keyReleased()
     }
   }
   if(keys && key == BACKSPACE && keyword.length() > 0) keyword = keyword.substring(0,keyword.length()-1);
-  else if(keys && textWidth(keyword + key) < 120) keyword = keyword + key;
+  else if(keys && textWidth(keyword + key) < 120 && key > 31 && key < 127) keyword = keyword + key;
 }
 
 void mouseDragged()
