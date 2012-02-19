@@ -123,6 +123,7 @@ void setup()
     keyw2 = loadImage("keyword2.png");
     sideImage = loadImage("sidebar.png");
     states = new HashMap(STATE_NAMES.length);
+    minValue = 1;
     for(int i=0;i<STATE_NAMES.length;i+=2)
     {
         states.put(STATE_NAMES[i], new State(STATE_NAMES[i], mainMap.getChild(STATE_NAMES[i+1])));
@@ -372,6 +373,7 @@ void keyReleased(){
     if(authed){
       if (keyword == "") twitter.sample();
       else twitter.filter(new FilterQuery().track(keywords));
+      setup();
     }
   }
   if(keys && key == BACKSPACE && keyword.length() > 0) keyword = keyword.substring(0,keyword.length()-1);
