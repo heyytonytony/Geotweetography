@@ -129,7 +129,7 @@ void setup()
     pause = loadImage("pause.png");
     keyw = loadImage("keyword.png");
     keyw2 = loadImage("keyword2.png");
-    sideImage = loadImage("sidebar.png");
+    sideImage = loadImage("sidebar2.png");
     sideFont = createFont("Gill Sans MT",66);
     states = new HashMap(STATE_NAMES.length);
     minValue = 1;
@@ -174,7 +174,7 @@ void draw()
 
     pushMatrix();
     resetMatrix();
-    image(sideImage, sideX+15+500-500*trans, 0);
+    image(sideImage, sideX+22+500-500*trans, 0);
     textFont(sideFont);
     fill(33,33,33);
 
