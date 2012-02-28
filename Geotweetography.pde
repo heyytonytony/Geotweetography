@@ -7,9 +7,8 @@ import java.util.Enumeration;
 //Auth info
 static String OAuthConsumerKey = "7qBKSzIvHjWWtOvAn3grg";
 static String OAuthConsumerSecret = "rnyVF2lfHhOYx2x2HF3N3cPZIuQ9acUQ75qtrYwK9g";
-static String AccessToken = "87373158-dGVN5yA8Uz3rCjCP7IKZLd6vbBPPp40h9ZACUA9NA";
-static String AccessTokenSecret = "nFqBdzuO9PAnNCEJTx5F4l5sTXRTiXxcQLbZ2SjbAxQ";
-
+static String AccessToken = null;
+static String AccessTokenSecret = null;
 
 //Twitter stream
 TwitterStream twitter = new TwitterStreamFactory().getInstance();
@@ -115,6 +114,19 @@ boolean fpsOn = false;
 
 void setup()
 {
+    try
+    {
+        String accessPath = dataPath("access");
+        BufferedReader br = new BufferedReader(new FileReader(accessPath));
+        AccessToken = br.readLine();
+        AccessTokenSecret = br.readLine();
+    }
+    catch(Exception e)
+    {
+        println("Exception: " + e.toString());
+        exit();
+    }
+
     mainMap = loadShape("Blank_US_Map.svg");
     size(1200,800);
     bgImage = loadImage("background4.png");
@@ -312,7 +324,7 @@ void mousePressed()
 {
     if(mouseX > 25 && mouseX < 100 && mouseY > 725 && mouseY < 790){
         playb = !playb;
-        
+
         if(keys){
           keys = false;
           keywords[0] = keyword;
@@ -320,7 +332,7 @@ void mousePressed()
             setup();
           }
         }
-        
+
         if(playb && !init){
           connectTwitter();
           twitter.addListener(listener);
